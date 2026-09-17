@@ -35,7 +35,7 @@ export default function ProjectFormPage() {
   const [description, setDescription] = useState(existing?.description ?? "");
 
   if (isEdit && !existing) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/projects" replace />;
   }
 
   function handleSubmit(e: FormEvent) {
@@ -65,7 +65,7 @@ export default function ProjectFormPage() {
   return (
     <div className="px-4 pb-10 pt-3 md:px-6">
       <Link
-        to={isEdit && id ? `/projects/${id}` : "/"}
+        to={isEdit && id ? `/projects/${id}` : "/projects"}
         className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text"
       >
         <ArrowLeft size={16} />

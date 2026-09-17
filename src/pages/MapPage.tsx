@@ -4,20 +4,11 @@ import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { useAppStore } from "../store/useAppStore";
 import { usePageTitle } from "../lib/usePageTitle";
-import { statusConfig } from "../lib/projectStatus";
+import { PROJECT_STATUSES, statusConfig } from "../lib/projectStatus";
 import { formatCurrency } from "../lib/format";
 import { PremiumGate } from "../components/ui/PremiumGate";
 import { EmptyState } from "../components/ui/EmptyState";
 import { MapPin } from "lucide-react";
-
-const STATUS_COLOR: Record<string, string> = {
-  lead: "#94a3b8",
-  quoting: "#fbbf24",
-  scheduled: "#a78bfa",
-  in_progress: "#60a5fa",
-  done: "#34d399",
-  invoiced: "#2dd4bf",
-};
 
 function markerIcon(color: string) {
   return L.divIcon({
@@ -67,7 +58,7 @@ export default function MapPage() {
                   <Marker
                     key={project.id}
                     position={[project.location!.lat, project.location!.lng]}
-                    icon={markerIcon(STATUS_COLOR[project.status])}
+                    icon={markerIcon(status.color)}
                   >
                     <Popup>
                       <div className="text-sm">
@@ -86,6 +77,24 @@ export default function MapPage() {
               })}
             </MapContainer>
           </div>
+        )}
+
+        {located.length > 0 && (
+          <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+            {PROJECT_STATUSES.map((s) => (
+              <li key={s.id} className="flex items-center gap-1.5 text-xs text-text-muted">
+                <span
+                  className="status-dot size-2.5 rounded-full"
+                  style={{ ["--status" as string]: s.color }}
+                />
+                {s.label}
+              </li>
+            ))}
+            <li className="flex items-center gap-1.5 text-xs text-text-muted">
+              <span className="size-2.5 rounded-full bg-text" />
+              Székhely
+            </li>
+          </ul>
         )}
       </PremiumGate>
     </div>

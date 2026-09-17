@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { CalendarClock, MapPin } from "lucide-react";
 import type { Project } from "../../types/domain";
 import { useAppStore } from "../../store/useAppStore";
-import { statusConfig } from "../../lib/projectStatus";
+import { statusConfig, statusVars } from "../../lib/projectStatus";
 import { formatCurrency, formatDate } from "../../lib/format";
 import { Badge } from "../ui/Badge";
 import { Card } from "../ui/Card";
@@ -17,8 +17,8 @@ export function ProjectCard({ project }: { project: Project }) {
       <Card className="p-4 transition-shadow hover:shadow-md active:scale-[0.99]">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold leading-snug">{project.title}</h3>
-          <Badge className={status.badge}>
-            <span className={`size-1.5 rounded-full ${status.dot}`} />
+          <Badge className="status-badge" style={statusVars(project.status)}>
+            <span className="status-dot size-1.5 rounded-full" />
             {status.shortLabel}
           </Badge>
         </div>

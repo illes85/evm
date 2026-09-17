@@ -12,22 +12,23 @@ export function BottomNav() {
       className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-surface/95 backdrop-blur pb-safe"
       aria-label="Fő navigáció"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {NAV_ITEMS.map((item) => {
           const locked = item.premium && plan !== "premium";
           return (
             <li key={item.to}>
               <NavLink
                 to={item.to}
+                end={item.to === "/"}
                 className={({ isActive }) =>
                   cx(
-                    "flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
+                    "flex flex-col items-center gap-1 px-0.5 py-2.5 text-[10px] font-medium transition-colors",
                     isActive ? "text-primary" : "text-text-muted",
                   )
                 }
               >
                 <span className="relative">
-                  <item.icon size={22} strokeWidth={2} />
+                  <item.icon size={21} strokeWidth={2} />
                   {locked && (
                     <Lock
                       size={11}

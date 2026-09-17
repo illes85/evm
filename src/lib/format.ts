@@ -6,6 +6,17 @@ export function formatCurrency(amount: number, currency = "HUF"): string {
   }).format(amount);
 }
 
+/** Short form for stat tiles, where the full figure would not fit: 524 E Ft,
+ * 1,4 M Ft. Only millions keep a decimal — a fraction on thousands is noise. */
+export function formatCurrencyCompact(amount: number, currency = "HUF"): string {
+  return new Intl.NumberFormat("hu-HU", {
+    style: "currency",
+    currency,
+    notation: "compact",
+    maximumFractionDigits: Math.abs(amount) >= 1_000_000 ? 1 : 0,
+  }).format(amount);
+}
+
 export function formatDate(iso?: string): string {
   if (!iso) return "";
   const d = new Date(iso);

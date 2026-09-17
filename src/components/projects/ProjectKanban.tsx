@@ -57,7 +57,10 @@ export function ProjectKanban({ projects }: { projects: Project[] }) {
             className="snap-center shrink-0 w-[88vw] sm:w-80 md:w-72"
           >
             <div className="mb-3 flex items-center gap-2 px-0.5">
-              <span className={`size-2 rounded-full ${status.dot}`} />
+              <span
+                className="status-dot size-2 rounded-full"
+                style={{ ["--status" as string]: status.color }}
+              />
               <h3 className="text-sm font-semibold">{status.label}</h3>
               <span className="text-xs text-text-muted">{items.length}</span>
             </div>

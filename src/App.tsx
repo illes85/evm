@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { PageTitleProvider } from "./lib/usePageTitle";
 import { useThemeEffect } from "./theme/useThemeEffect";
+import OverviewPage from "./pages/OverviewPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 import ProjectFormPage from "./pages/ProjectFormPage";
@@ -28,7 +29,9 @@ function ThemedRoutes() {
   return (
     <Routes>
       <Route element={<AppShell />}>
-        <Route path="/" element={<ProjectsPage />} />
+        <Route path="/" element={<OverviewPage />} />
+
+        <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/new" element={<ProjectFormPage />} />
         <Route path="/projects/:id" element={<ProjectDetailPage />} />
         <Route path="/projects/:id/edit" element={<ProjectFormPage />} />

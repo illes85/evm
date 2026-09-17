@@ -7,6 +7,12 @@ csomagstruktúrával előkészítve a jövőbeli értékesítéshez.
 ## Funkciók
 
 ### Alap csomag
+- **Áttekintés** (kezdőnézet): a nap indításához — mi igényel figyelmet (lejárt
+  számla, lejáró ajánlat, csúszó munka), mi van folyamatban vagy ma esedékes,
+  havi bevétel az előző hónap *azonos időszakához* mérve, kintlévőség (és
+  abból a lejárt rész), nyitott ajánlatok, aktív munkák értéke, valamint a
+  projektek állapot szerinti megoszlása — a sorokra koppintva szűrt
+  projektlista nyílik.
 - **Projektek**: lista nézet (alapértelmezett) és kanban tábla, ahol a mobil
   nézetben az állapot-oszlopok között jobbra-balra húzva (natív scroll-snap)
   lehet lapozni, pont-indikátorral. Kártyára koppintva a projekt "előtérbe kerül"
@@ -35,8 +41,11 @@ lévő demó csomagváltóval bárki kipróbálhatja mindkét állapotot:
 - **Távolság- és kiszállásiköltség-számítás**: a székhely és a projekt
   koordinátái alapján (Haversine-képlet + útkanyar-szorzó), a beállított
   Ft/km díjjal.
+- **Bevételi trend és teljesítménymutatók**: 6 havi bevétel-oszlopdiagram (a
+  folyó, még nem zárt hónap halványan jelölve), ajánlat-elfogadási arány,
+  átlagos projektérték.
 - **Térkép nézet**: a projektek státusz szerint színezett pöttyökkel egy
-  Leaflet/OpenStreetMap térképen.
+  Leaflet/OpenStreetMap térképen, jelmagyarázattal.
 - **AI email tervezetek**: ajánlathoz és számlához generált, vágólapra
   másolható email-tervezet sablon alapján.
 - **Lead-import**: kézi felvitel most, Google Sheets és Google Cégem
@@ -56,6 +65,16 @@ használja (Chrome-ban működik igazán jól). Amikor lesz backend:
   légvonal-becslés helyett,
 - a lead-integrációk valódi OAuth-alapú Google Sheets / Google Business
   Profile kapcsolatot kapnak.
+
+## Státuszszínek
+
+A hat projektállapot színe egyetlen helyen van definiálva
+(`src/lib/projectStatus.ts`), és onnan származik a pötty, a címke, a
+térképtű és a diagramsáv is. A készlet színvakság-szimulációval és
+kontrasztméréssel lett kiválasztva: a legrosszabb szomszédos pár ΔE 15
+(deuteranopia) és ΔE 19,9 (ép színlátás), mindegyik szín 3:1 feletti
+kontraszttal mind a világos, mind a sötét háttéren. **Módosítás előtt
+érdemes újra ellenőrizni**, mert a térképen a szín az egyetlen jelzés.
 
 ## Tech stack
 

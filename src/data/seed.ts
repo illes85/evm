@@ -11,6 +11,10 @@ import type {
 const now = new Date();
 const daysAgo = (n: number) => new Date(now.getTime() - n * 86400000).toISOString();
 const daysAhead = (n: number) => new Date(now.getTime() + n * 86400000).toISOString();
+/** Mid-month date n calendar months back — keeps the seeded revenue history
+ * landing in the intended month regardless of today's day-of-month. */
+const monthsAgo = (n: number) =>
+  new Date(now.getFullYear(), now.getMonth() - n, 15).toISOString();
 
 export function createSeedClients(): Client[] {
   return [
@@ -170,7 +174,43 @@ export function createSeedProjects(clients: Client[]): Project[] {
 export function createSeedQuotes(projects: Project[]): Quote[] {
   const bojler = projects.find((p) => p.title.startsWith("Villanybojler"));
   const terasz = projects.find((p) => p.title.startsWith("Teraszburkolás"));
+  const gipszkarton = projects.find((p) => p.title.startsWith("Gipszkartonozás"));
+  const festes = projects.find((p) => p.title.startsWith("Festés"));
   return [
+    {
+      id: newId(),
+      number: "AJ-2026-011",
+      projectId: gipszkarton?.id,
+      clientId: gipszkarton?.clientId,
+      status: "accepted",
+      items: [
+        { id: newId(), description: "Gipszkarton anyag", quantity: 1, unit: "tétel", unitPrice: 140000 },
+        { id: newId(), description: "Szerelési munkadíj", quantity: 16, unit: "óra", unitPrice: 12500 },
+      ],
+      createdAt: daysAgo(45),
+    },
+    {
+      id: newId(),
+      number: "AJ-2026-012",
+      projectId: festes?.id,
+      clientId: festes?.clientId,
+      status: "accepted",
+      items: [
+        { id: newId(), description: "Festék, glettanyag", quantity: 1, unit: "tétel", unitPrice: 60000 },
+        { id: newId(), description: "Festési munkadíj", quantity: 12, unit: "óra", unitPrice: 12500 },
+      ],
+      createdAt: daysAgo(20),
+    },
+    {
+      id: newId(),
+      number: "AJ-2026-013",
+      status: "rejected",
+      items: [
+        { id: newId(), description: "Kerítésépítés", quantity: 18, unit: "m", unitPrice: 24000 },
+      ],
+      note: "Az ügyfél másik vállalkozót választott az ár miatt.",
+      createdAt: daysAgo(18),
+    },
     {
       id: newId(),
       number: "AJ-2026-014",
@@ -202,10 +242,38 @@ export function createSeedQuotes(projects: Project[]): Quote[] {
   ];
 }
 
+/** Closed months of revenue, so the trend chart and the month-over-month
+ * comparison have history to show. */
+const REVENUE_HISTORY: { monthsBack: number; number: string; description: string; amount: number }[] = [
+  { monthsBack: 5, number: "SZ-2026-018", description: "Lakásfelújítás — II. ütem", amount: 980000 },
+  { monthsBack: 4, number: "SZ-2026-021", description: "Vizesblokk felújítás", amount: 1240000 },
+  { monthsBack: 3, number: "SZ-2026-024", description: "Tetőtéri szigetelés", amount: 760000 },
+  { monthsBack: 2, number: "SZ-2026-027", description: "Iroda festés, villanyszerelés", amount: 1420000 },
+  { monthsBack: 1, number: "SZ-2026-029", description: "Konyhafelújítás", amount: 1150000 },
+];
+
 export function createSeedInvoices(projects: Project[]): Invoice[] {
   const gipszkarton = projects.find((p) => p.title.startsWith("Gipszkartonozás"));
   const festes = projects.find((p) => p.title.startsWith("Festés"));
   return [
+    ...REVENUE_HISTORY.map((entry) => ({
+      id: newId(),
+      number: entry.number,
+      status: "paid" as const,
+      items: [
+        {
+          id: newId(),
+          description: entry.description,
+          quantity: 1,
+          unit: "tétel",
+          unitPrice: entry.amount,
+        },
+      ],
+      issueDate: monthsAgo(entry.monthsBack),
+      dueDate: monthsAgo(entry.monthsBack),
+      paidAt: monthsAgo(entry.monthsBack),
+      createdAt: monthsAgo(entry.monthsBack),
+    })),
     {
       id: newId(),
       number: "SZ-2026-031",
@@ -220,6 +288,18 @@ export function createSeedInvoices(projects: Project[]): Invoice[] {
       dueDate: daysAgo(2),
       paidAt: daysAgo(3),
       createdAt: daysAgo(12),
+    },
+    {
+      id: newId(),
+      number: "SZ-2026-030",
+      clientId: projects[3]?.clientId,
+      status: "issued",
+      items: [
+        { id: newId(), description: "Garázs villanyszerelés", quantity: 1, unit: "tétel", unitPrice: 185000 },
+      ],
+      issueDate: daysAgo(38),
+      dueDate: daysAgo(14),
+      createdAt: daysAgo(38),
     },
     {
       id: newId(),

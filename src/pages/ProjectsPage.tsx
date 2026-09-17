@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Kanban, LayoutList, Search } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
 import { usePageTitle } from "../lib/usePageTitle";
 import { ProjectKanban } from "../components/projects/ProjectKanban";
@@ -15,9 +16,19 @@ type ViewMode = "list" | "kanban";
 export default function ProjectsPage() {
   usePageTitle("Projektek");
   const projects = useAppStore((s) => s.projects);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState<ViewMode>("list");
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ProjectStatus | "all">("all");
+
+  const statusParam = searchParams.get("status");
+  const statusFilter: ProjectStatus | "all" = PROJECT_STATUSES.some((s) => s.id === statusParam)
+    ? (statusParam as ProjectStatus)
+    : "all";
+
+  function setStatusFilter(status: ProjectStatus | "all") {
+    if (status === "all") setSearchParams({}, { replace: true });
+    else setSearchParams({ status }, { replace: true });
+  }
 
   const filtered = useMemo(() => {
     return projects

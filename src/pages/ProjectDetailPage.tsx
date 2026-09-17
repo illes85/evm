@@ -13,7 +13,7 @@ import {
 import { useMemo, useState } from "react";
 import { useAppStore } from "../store/useAppStore";
 import { usePageTitle } from "../lib/usePageTitle";
-import { statusConfig, PROJECT_STATUSES } from "../lib/projectStatus";
+import { statusConfig, statusVars, PROJECT_STATUSES } from "../lib/projectStatus";
 import { formatCurrency, formatDate, formatDateTime } from "../lib/format";
 import { Badge } from "../components/ui/Badge";
 import { Card } from "../components/ui/Card";
@@ -42,7 +42,7 @@ export default function ProjectDetailPage() {
   usePageTitle(project?.title ?? "Projekt");
 
   if (!project) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/projects" replace />;
   }
 
   const status = statusConfig(project.status);
@@ -51,7 +51,7 @@ export default function ProjectDetailPage() {
     if (!project) return;
     if (window.confirm(`Biztosan törlöd a(z) "${project.title}" projektet?`)) {
       deleteProject(project.id);
-      navigate("/");
+      navigate("/projects");
     }
   }
 
@@ -71,7 +71,7 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="animate-slide-up px-4 pb-8 pt-3 md:px-6">
-      <Link to="/" className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text">
+      <Link to="/projects" className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-text">
         <ArrowLeft size={16} />
         Vissza a projektekhez
       </Link>
@@ -79,8 +79,8 @@ export default function ProjectDetailPage() {
       <Card className="mt-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-xl font-bold leading-tight">{project.title}</h2>
-          <Badge className={status.badge}>
-            <span className={`size-1.5 rounded-full ${status.dot}`} />
+          <Badge className="status-badge" style={statusVars(project.status)}>
+            <span className="status-dot size-1.5 rounded-full" />
             {status.label}
           </Badge>
         </div>

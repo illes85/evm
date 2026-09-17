@@ -110,6 +110,20 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* Project-status marks and badges, derived from the `--status` hue set inline
+   by statusVars() — one source of truth per status, both themes handled here. */
+.status-dot {
+  background-color: var(--status);
+}
+.status-badge {
+  background-color: color-mix(in oklab, var(--status) 14%, transparent);
+  color: color-mix(in oklab, var(--status) 82%, black);
+}
+[data-mode="dark"] .status-badge {
+  background-color: color-mix(in oklab, var(--status) 24%, transparent);
+  color: color-mix(in oklab, var(--status) 40%, white);
+}
+
 /* Hide scrollbars on the swipeable kanban track while keeping it scrollable */
 .no-scrollbar {
   scrollbar-width: none;

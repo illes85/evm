@@ -1,4 +1,4 @@
-import { LayoutGrid, MapPin, Receipt, Users } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, MapPin, Receipt, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
@@ -9,7 +9,8 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { to: "/", label: "Projektek", icon: LayoutGrid },
+  { to: "/", label: "Áttekintés", icon: LayoutDashboard },
+  { to: "/projects", label: "Projektek", icon: LayoutGrid },
   { to: "/clients", label: "Ügyfelek", icon: Users },
   { to: "/quotes", label: "Pénzügyek", icon: Receipt },
   { to: "/map", label: "Térkép", icon: MapPin, premium: true },
