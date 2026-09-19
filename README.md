@@ -66,6 +66,18 @@ használja (Chrome-ban működik igazán jól). Amikor lesz backend:
 - a lead-integrációk valódi OAuth-alapú Google Sheets / Google Business
   Profile kapcsolatot kapnak.
 
+## Térkép csempeszolgáltató
+
+A térkép alapértelmezésben az OpenStreetMap nyilvános csempéit tölti be, ami
+fejlesztéshez megfelelő, **éles, kereskedelmi használatra viszont az OSM
+használati szabályzata nem engedi**. Állíts be saját szolgáltatót a
+`.env.example` alapján (`VITE_MAP_TILE_URL`, `VITE_MAP_TILE_ATTRIBUTION`).
+
+Ha a csempék nem tölthetők be (nincs net, vagy a futtató környezet blokkolja a
+külső képeket — például egy beágyazott, szigorú CSP-vel futó előnézet), a
+térkép nem törik el: halvány rácsot rajzol, a jelölőket a valós koordinátákon
+tartja, és egy rövid magyarázó sávot mutat.
+
 ## Státuszszínek
 
 A hat projektállapot színe egyetlen helyen van definiálva

@@ -1,14 +1,16 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { useAppStore } from "../store/useAppStore";
 import { usePageTitle } from "../lib/usePageTitle";
 import { PROJECT_STATUSES, statusConfig } from "../lib/projectStatus";
+import { MAP_TILE_ATTRIBUTION, MAP_TILE_URL } from "../lib/mapTiles";
 import { formatCurrency } from "../lib/format";
 import { PremiumGate } from "../components/ui/PremiumGate";
 import { EmptyState } from "../components/ui/EmptyState";
-import { MapPin } from "lucide-react";
+import { cx } from "../lib/cx";
+import { MapPin, WifiOff } from "lucide-react";
 
 function markerIcon(color: string) {
   return L.divIcon({
@@ -24,6 +26,8 @@ export default function MapPage() {
   usePageTitle("Térkép");
   const projects = useAppStore((s) => s.projects);
   const base = useAppStore((s) => s.settings.profile.location);
+
+  const [tilesFailed, setTilesFailed] = useState(false);
 
   const located = useMemo(() => projects.filter((p) => p.location), [projects]);
   const center = base ?? located[0]?.location ?? { lat: 47.4979, lng: 19.0402 };
@@ -41,11 +45,24 @@ export default function MapPage() {
             description="Add meg a projektek szerkesztésénél a koordinátákat, hogy megjelenjenek a térképen."
           />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-border" style={{ height: "70vh" }}>
+          <div
+            className={cx(
+              "map-surface relative overflow-hidden rounded-2xl border border-border",
+              tilesFailed && "map-surface--fallback",
+            )}
+            style={{ height: "70vh" }}
+          >
+            {tilesFailed && (
+              <div className="pointer-events-none absolute right-3 top-3 left-16 z-[500] flex items-start gap-2 rounded-xl border border-border bg-surface/95 p-2.5 text-xs text-text-muted shadow-sm backdrop-blur">
+                <WifiOff size={14} className="mt-px shrink-0" />
+                <span>A térképcsempék nem érhetők el — a jelölők így is a valós koordinátákon állnak.</span>
+              </div>
+            )}
             <MapContainer center={[center.lat, center.lng]} zoom={12} style={{ height: "100%", width: "100%" }}>
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution={MAP_TILE_ATTRIBUTION}
+                url={MAP_TILE_URL}
+                eventHandlers={{ tileerror: () => setTilesFailed(true) }}
               />
               {base && (
                 <Marker position={[base.lat, base.lng]} icon={markerIcon("#0f172a")}>

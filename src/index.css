@@ -124,6 +124,19 @@ body {
   color: color-mix(in oklab, var(--status) 40%, white);
 }
 
+/* Leaflet paints its own light-grey ground, which is wrong in dark mode and
+   while tiles load. When tiles cannot load at all, a faint grid keeps the
+   markers readable as positions instead of dots on a blank card. */
+.map-surface .leaflet-container {
+  background-color: var(--surface-2);
+}
+.map-surface--fallback .leaflet-container {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
 /* Hide scrollbars on the swipeable kanban track while keeping it scrollable */
 .no-scrollbar {
   scrollbar-width: none;
