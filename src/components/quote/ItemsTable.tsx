@@ -66,7 +66,7 @@ export function ItemsTable({ items, vatRates, quoteDefaultVatRateId, onChange }:
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
             <tr>
-              <th className="py-2 pl-2">Tétel</th>
+              <th className="min-w-[160px] py-2 pl-2">Tétel</th>
               <th className="px-1 py-2">Menny.</th>
               <th className="px-1 py-2">Egység</th>
               <th className="px-1 py-2">Egységár</th>

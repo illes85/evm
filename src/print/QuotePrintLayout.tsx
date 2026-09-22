@@ -32,8 +32,8 @@ export function QuotePrintLayout({ quote, vatRates }: QuotePrintLayoutProps) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl bg-white p-10 text-sm text-slate-900 print:p-0">
-      <div className="mb-8 flex items-start justify-between">
+    <div className="mx-auto max-w-3xl bg-white p-4 text-sm text-slate-900 sm:p-10 print:p-0">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
           {logoUrl && <img src={logoUrl} alt="Logó" className="h-16 w-16 object-contain" />}
           <div>
@@ -45,7 +45,7 @@ export function QuotePrintLayout({ quote, vatRates }: QuotePrintLayoutProps) {
             {company.bankAccountNumber && <div className="text-slate-600">Bankszámla: {company.bankAccountNumber}</div>}
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-left sm:text-right print:text-right">
           <div className="text-2xl font-bold">Árajánlat</div>
           <div className="mt-1 text-slate-600">{quote.quoteNumber}</div>
           <div className="mt-2 text-slate-600">Kiállítva: {formatDate(quote.issueDate)}</div>
@@ -63,7 +63,8 @@ export function QuotePrintLayout({ quote, vatRates }: QuotePrintLayoutProps) {
         {client.phone && <div className="text-slate-600">{client.phone}</div>}
       </div>
 
-      <table className="w-full border-collapse text-sm">
+      <div className="overflow-x-auto print:overflow-visible">
+      <table className="w-full min-w-[600px] border-collapse text-sm">
         <thead>
           <tr className="border-b-2 border-slate-800 text-left text-xs uppercase text-slate-600">
             <th className="py-1.5 pr-2">Tétel</th>
@@ -110,6 +111,7 @@ export function QuotePrintLayout({ quote, vatRates }: QuotePrintLayoutProps) {
           )}
         </tbody>
       </table>
+      </div>
 
       <div className="mt-6 flex justify-end">
         <div className="w-72 space-y-1">

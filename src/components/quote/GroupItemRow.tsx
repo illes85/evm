@@ -48,7 +48,7 @@ export function GroupItemRow({
   return (
     <>
       <tr className="border-t border-slate-200 bg-blue-50/50">
-        <td className="py-2 pl-2 pr-2" colSpan={4}>
+        <td className="min-w-[160px] py-2 pl-2 pr-2" colSpan={4}>
           <div className="flex items-center gap-1">
             <div className="flex flex-col">
               <button

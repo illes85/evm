@@ -16,7 +16,7 @@ export function SubItemRow({ subItem, vatRates, quoteDefaultVatRateId, onUpdate,
 
   return (
     <tr className="border-t border-slate-100 bg-slate-50/50">
-      <td className="py-1.5 pl-8 pr-2">
+      <td className="min-w-[140px] py-1.5 pl-8 pr-2">
         <input
           className="w-full rounded border border-slate-200 px-2 py-1 text-sm"
           value={subItem.name}

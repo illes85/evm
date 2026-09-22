@@ -30,7 +30,7 @@ export function LeafItemRow({
 
   return (
     <tr className="border-t border-slate-200">
-      <td className="py-2 pl-2 pr-2">
+      <td className="min-w-[160px] py-2 pl-2 pr-2">
         <div className="flex items-center gap-1">
           <div className="flex flex-col">
             <button
