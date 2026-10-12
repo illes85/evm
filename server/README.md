@@ -14,30 +14,27 @@ evm.szilab.hu/
   api/
     index.php               <- a server/public/ tartalma
     .htaccess
-    migrate.php             <- a server/migrate.php
-    config.php              <- EZT TE HOZOD LÉTRE, lásd lentebb
+    migrate.php             <- csak parancssori használatra, nem kötelező
+    config.php              <- EZT TÖLTÖD KI, lásd lentebb
     src/                    <- a server/src/ tartalma
 ```
 
 Vagyis a `server/public/` fájljai és a `server/src/` mappa együtt kerülnek az
 `api/` könyvtárba.
 
-## Beállítás
+## Beállítás (két lépés)
 
 1. **Adatbázis.** A tárhely vezérlőpultján („Adatbázisok kezelése") hozz létre
    egy MySQL adatbázist, felhasználóval és jelszóval.
 
-2. **config.php.** Másold át a `config.example.php` fájlt `config.php` néven az
-   `api/` könyvtárba, és töltsd ki az adatbázis adataival. Az `app_secret`
-   legyen hosszú véletlen szöveg (SSH-n: `openssl rand -hex 32`). Ezt a fájlt
-   **soha ne töltsd fel a kódtárba** — a `.gitignore` ki is zárja.
+2. **config.php.** Az `api/config.php` fájlba írd be az adatbázis nevét,
+   felhasználóját és jelszavát. Más beállítani való nincs. Ez a fájl csak a
+   tárhelyen létezik, a kódtárba nem kerül bele — és **frissítéskor ne írd
+   felül**.
 
-3. **Séma létrehozása.** Vagy SSH-n `php migrate.php`, vagy böngészőből:
-   `https://evm.szilab.hu/api/migrate.php?key=AZ_APP_SECRET`
-   Újrafuttatható, csak a hiányzó lépéseket végzi el.
-
-4. **Ellenőrzés.** `https://evm.szilab.hu/api/index.php?r=health` — JSON
-   választ kell adnia.
+Ennyi. A táblák az első hívásnál maguktól létrejönnek, külön telepítő lépés
+nincs. Ellenőrzés: `https://evm.szilab.hu/api/index.php?r=health` — JSON
+választ kell adnia. Ha valami hiányzik, a válasz megmondja, mi.
 
 ## Végpontok
 
@@ -74,6 +71,10 @@ vállalkozó egy fiókkal, jellemzően egy eszközön dolgozik, így valódi üt
 ritka. Ha később többen dolgoznak egy fiókon, ezt mezőnkénti összefésülésre
 kell cserélni.
 
+**Önbeállítás.** A séma az első kérésnél magától létrejön és frissül. Ez
+azért biztonságos, mert a migrációink kizárólag hozzáadnak (új tábla, új
+oszlop); adatot törlő vagy átíró lépés automatikusan soha nem fut.
+
 **Biztonság.** A jelszavak `password_hash`-sel tárolódnak; a munkamenet-token
 véletlen 32 bájt, és csak a SHA-256 lenyomata kerül adatbázisba, így egy
 adatbázis-szivárgásból nem lehet belépni. Ismeretlen email esetén is lefut egy
@@ -89,7 +90,6 @@ kikapcsolva), a tábla nevét pedig csak rögzített listáról fogadjuk el.
 mysql -uroot -e "CREATE DATABASE evm_dev CHARACTER SET utf8mb4"
 
 cp server/config.example.php server/config.php   # töltsd ki
-php server/migrate.php
-php -S 127.0.0.1:8099 -t server/public
+php -S 127.0.0.1:8099 -t server/public           # a táblák maguktól létrejönnek
 curl "http://127.0.0.1:8099/index.php?r=health"
 ```

@@ -17,6 +17,7 @@ require $root . '/src/Http.php';
 require $root . '/src/Auth.php';
 require $root . '/src/Schema.php';
 require $root . '/src/Sync.php';
+require $root . '/src/Setup.php';
 
 $configPath = $root . '/config.php';
 if (!is_file($configPath)) {
@@ -30,6 +31,21 @@ if (!is_file($configPath)) {
 }
 $config = require $configPath;
 
+// Kitöltetlen sablon: mondjuk meg emberi nyelven, mi a teendő.
+$dbConfig = $config['db'] ?? [];
+foreach (['name', 'user', 'pass'] as $field) {
+    if (strpos((string) ($dbConfig[$field] ?? ''), 'IDE_') === 0) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'error' => 'not_configured',
+            'message' => 'A config.php még a minta szöveget tartalmazza. '
+                . 'Írd bele az adatbázis nevét, felhasználóját és jelszavát.',
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+}
+
 $http = new Http($config);
 $http->applyCors();
 
@@ -39,7 +55,17 @@ set_error_handler(static function (int $severity, string $message, string $file,
 });
 
 try {
-    $db = new Db($config['db']);
+    try {
+        $db = new Db($config['db']);
+    } catch (PDOException $e) {
+        error_log('[evm-api] db connect: ' . $e->getMessage());
+        Http::fail(500, 'db_unavailable',
+            'Nem sikerült csatlakozni az adatbázishoz. Ellenőrizd a config.php-ban '
+            . 'az adatbázis nevét, felhasználóját és jelszavát.');
+    }
+    // Első indításkor (és frissítés után) magától létrehozza a táblákat,
+    // így a telepítés nem igényel külön lépést.
+    Setup::ensureSchema($db);
     $auth = new Auth($db);
     $route = Http::route();
     $method = Http::method();
@@ -59,6 +85,8 @@ try {
             Http::json([
                 'ok' => true,
                 'php' => PHP_VERSION,
+                'database' => 'kapcsolódva',
+                'tables' => count(Schema::migrations()),
                 'time' => gmdate('c'),
             ]);
             // no break — a Http::json kilép

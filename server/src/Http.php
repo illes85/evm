@@ -3,6 +3,13 @@
 /** Kérés beolvasása és válaszadás, egy helyen. */
 final class Http
 {
+    /** Ezekről a címekről fogadunk böngészős kérést, ha a config nem szól mást. */
+    const DEFAULT_ORIGINS = [
+        'https://evm.szilab.hu',
+        'https://illes85.github.io',
+        'http://localhost:5173',
+    ];
+
     /** @var array */
     private $config;
 
@@ -15,7 +22,7 @@ final class Http
     public function applyCors(): void
     {
         $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-        $allowed = $this->config['allowed_origins'] ?? [];
+        $allowed = $this->config['allowed_origins'] ?? self::DEFAULT_ORIGINS;
 
         if ($origin !== '' && in_array($origin, $allowed, true)) {
             header('Access-Control-Allow-Origin: ' . $origin);
