@@ -1,20 +1,15 @@
 import { newId } from "../lib/id";
-import type {
-  Client,
-  Invoice,
-  Lead,
-  Project,
-  Quote,
-  Settings,
-} from "../types/domain";
+import type { Client, Invoice, Lead, Project, Quote, Settings } from "../types/domain";
 
 const now = new Date();
 const daysAgo = (n: number) => new Date(now.getTime() - n * 86400000).toISOString();
 const daysAhead = (n: number) => new Date(now.getTime() + n * 86400000).toISOString();
 /** Mid-month date n calendar months back — keeps the seeded revenue history
  * landing in the intended month regardless of today's day-of-month. */
-const monthsAgo = (n: number) =>
-  new Date(now.getFullYear(), now.getMonth() - n, 15).toISOString();
+const monthsAgo = (n: number) => new Date(now.getFullYear(), now.getMonth() - n, 15).toISOString();
+
+/** Seed rows carry one date; sync needs createdAt and updatedAt both. */
+const at = (iso: string) => ({ createdAt: iso, updatedAt: iso });
 
 export function createSeedClients(): Client[] {
   return [
@@ -25,7 +20,7 @@ export function createSeedClients(): Client[] {
       phone: "+36 30 123 4567",
       address: "1111 Budapest, Bartók Béla út 12.",
       location: { lat: 47.4808, lng: 19.0553 },
-      createdAt: daysAgo(120),
+      ...at(daysAgo(120)),
     },
     {
       id: newId(),
@@ -35,7 +30,7 @@ export function createSeedClients(): Client[] {
       phone: "+36 20 234 5678",
       address: "1027 Budapest, Margit körút 45.",
       location: { lat: 47.5099, lng: 19.0364 },
-      createdAt: daysAgo(95),
+      ...at(daysAgo(95)),
     },
     {
       id: newId(),
@@ -44,7 +39,7 @@ export function createSeedClients(): Client[] {
       phone: "+36 70 345 6789",
       address: "1088 Budapest, Rákóczi út 5.",
       location: { lat: 47.4949, lng: 19.0682 },
-      createdAt: daysAgo(60),
+      ...at(daysAgo(60)),
       notes: "Törzsvásárló, mindig pontosan fizet.",
     },
     {
@@ -54,7 +49,7 @@ export function createSeedClients(): Client[] {
       phone: "+36 30 456 7890",
       address: "1222 Budapest, Nagytétényi út 120.",
       location: { lat: 47.4076, lng: 19.0389 },
-      createdAt: daysAgo(30),
+      ...at(daysAgo(30)),
     },
     {
       id: newId(),
@@ -63,7 +58,7 @@ export function createSeedClients(): Client[] {
       phone: "+36 20 567 8901",
       address: "1015 Budapest, Batthyány tér 3.",
       location: { lat: 47.5058, lng: 19.0392 },
-      createdAt: daysAgo(10),
+      ...at(daysAgo(10)),
     },
   ];
 }
@@ -90,7 +85,7 @@ export function createSeedProjects(clients: Client[]): Project[] {
           source: "manual",
         },
       ],
-      createdAt: daysAgo(20),
+      ...at(daysAgo(20)),
       updatedAt: daysAgo(1),
     },
     {
@@ -104,7 +99,7 @@ export function createSeedProjects(clients: Client[]): Project[] {
       scheduledDate: daysAhead(2),
       description: "Egyedi konyhabútor összeszerelése és beépítése.",
       notes: [],
-      createdAt: daysAgo(8),
+      ...at(daysAgo(8)),
       updatedAt: daysAgo(2),
     },
     {
@@ -117,7 +112,7 @@ export function createSeedProjects(clients: Client[]): Project[] {
       estimatedValue: 145000,
       description: "120 literes bojler cseréje, régi leszerelése.",
       notes: [],
-      createdAt: daysAgo(4),
+      ...at(daysAgo(4)),
       updatedAt: daysAgo(1),
     },
     {
@@ -130,7 +125,7 @@ export function createSeedProjects(clients: Client[]): Project[] {
       estimatedValue: 620000,
       description: "Érdeklődés kültéri járólap lerakásról, kb. 25 m².",
       notes: [],
-      createdAt: daysAgo(2),
+      ...at(daysAgo(2)),
       updatedAt: daysAgo(2),
     },
     {
@@ -151,7 +146,7 @@ export function createSeedProjects(clients: Client[]): Project[] {
           source: "manual",
         },
       ],
-      createdAt: daysAgo(15),
+      ...at(daysAgo(15)),
       updatedAt: daysAgo(1),
     },
     {
@@ -165,7 +160,7 @@ export function createSeedProjects(clients: Client[]): Project[] {
       dueDate: daysAgo(12),
       description: "Álmennyezet és válaszfal kialakítása.",
       notes: [],
-      createdAt: daysAgo(40),
+      ...at(daysAgo(40)),
       updatedAt: daysAgo(10),
     },
   ];
@@ -184,10 +179,22 @@ export function createSeedQuotes(projects: Project[]): Quote[] {
       clientId: gipszkarton?.clientId,
       status: "accepted",
       items: [
-        { id: newId(), description: "Gipszkarton anyag", quantity: 1, unit: "tétel", unitPrice: 140000 },
-        { id: newId(), description: "Szerelési munkadíj", quantity: 16, unit: "óra", unitPrice: 12500 },
+        {
+          id: newId(),
+          description: "Gipszkarton anyag",
+          quantity: 1,
+          unit: "tétel",
+          unitPrice: 140000,
+        },
+        {
+          id: newId(),
+          description: "Szerelési munkadíj",
+          quantity: 16,
+          unit: "óra",
+          unitPrice: 12500,
+        },
       ],
-      createdAt: daysAgo(45),
+      ...at(daysAgo(45)),
     },
     {
       id: newId(),
@@ -196,10 +203,22 @@ export function createSeedQuotes(projects: Project[]): Quote[] {
       clientId: festes?.clientId,
       status: "accepted",
       items: [
-        { id: newId(), description: "Festék, glettanyag", quantity: 1, unit: "tétel", unitPrice: 60000 },
-        { id: newId(), description: "Festési munkadíj", quantity: 12, unit: "óra", unitPrice: 12500 },
+        {
+          id: newId(),
+          description: "Festék, glettanyag",
+          quantity: 1,
+          unit: "tétel",
+          unitPrice: 60000,
+        },
+        {
+          id: newId(),
+          description: "Festési munkadíj",
+          quantity: 12,
+          unit: "óra",
+          unitPrice: 12500,
+        },
       ],
-      createdAt: daysAgo(20),
+      ...at(daysAgo(20)),
     },
     {
       id: newId(),
@@ -209,7 +228,7 @@ export function createSeedQuotes(projects: Project[]): Quote[] {
         { id: newId(), description: "Kerítésépítés", quantity: 18, unit: "m", unitPrice: 24000 },
       ],
       note: "Az ügyfél másik vállalkozót választott az ár miatt.",
-      createdAt: daysAgo(18),
+      ...at(daysAgo(18)),
     },
     {
       id: newId(),
@@ -218,12 +237,30 @@ export function createSeedQuotes(projects: Project[]): Quote[] {
       clientId: bojler?.clientId,
       status: "sent",
       items: [
-        { id: newId(), description: "120 literes villanybojler", quantity: 1, unit: "db", unitPrice: 95000 },
-        { id: newId(), description: "Régi bojler bontása, elszállítása", quantity: 1, unit: "alk.", unitPrice: 15000 },
-        { id: newId(), description: "Szerelési munkadíj", quantity: 3, unit: "óra", unitPrice: 12000 },
+        {
+          id: newId(),
+          description: "120 literes villanybojler",
+          quantity: 1,
+          unit: "db",
+          unitPrice: 95000,
+        },
+        {
+          id: newId(),
+          description: "Régi bojler bontása, elszállítása",
+          quantity: 1,
+          unit: "alk.",
+          unitPrice: 15000,
+        },
+        {
+          id: newId(),
+          description: "Szerelési munkadíj",
+          quantity: 3,
+          unit: "óra",
+          unitPrice: 12000,
+        },
       ],
       validUntil: daysAhead(10),
-      createdAt: daysAgo(2),
+      ...at(daysAgo(2)),
     },
     {
       id: newId(),
@@ -234,21 +271,42 @@ export function createSeedQuotes(projects: Project[]): Quote[] {
       items: [
         { id: newId(), description: "Kültéri járólap", quantity: 25, unit: "m²", unitPrice: 9800 },
         { id: newId(), description: "Aljzatkészítés", quantity: 25, unit: "m²", unitPrice: 4500 },
-        { id: newId(), description: "Lerakási munkadíj", quantity: 25, unit: "m²", unitPrice: 6200 },
+        {
+          id: newId(),
+          description: "Lerakási munkadíj",
+          quantity: 25,
+          unit: "m²",
+          unitPrice: 6200,
+        },
       ],
       validUntil: daysAhead(14),
-      createdAt: daysAgo(1),
+      ...at(daysAgo(1)),
     },
   ];
 }
 
 /** Closed months of revenue, so the trend chart and the month-over-month
  * comparison have history to show. */
-const REVENUE_HISTORY: { monthsBack: number; number: string; description: string; amount: number }[] = [
-  { monthsBack: 5, number: "SZ-2026-018", description: "Lakásfelújítás — II. ütem", amount: 980000 },
+const REVENUE_HISTORY: {
+  monthsBack: number;
+  number: string;
+  description: string;
+  amount: number;
+}[] = [
+  {
+    monthsBack: 5,
+    number: "SZ-2026-018",
+    description: "Lakásfelújítás — II. ütem",
+    amount: 980000,
+  },
   { monthsBack: 4, number: "SZ-2026-021", description: "Vizesblokk felújítás", amount: 1240000 },
   { monthsBack: 3, number: "SZ-2026-024", description: "Tetőtéri szigetelés", amount: 760000 },
-  { monthsBack: 2, number: "SZ-2026-027", description: "Iroda festés, villanyszerelés", amount: 1420000 },
+  {
+    monthsBack: 2,
+    number: "SZ-2026-027",
+    description: "Iroda festés, villanyszerelés",
+    amount: 1420000,
+  },
   { monthsBack: 1, number: "SZ-2026-029", description: "Konyhafelújítás", amount: 1150000 },
 ];
 
@@ -272,7 +330,7 @@ export function createSeedInvoices(projects: Project[]): Invoice[] {
       issueDate: monthsAgo(entry.monthsBack),
       dueDate: monthsAgo(entry.monthsBack),
       paidAt: monthsAgo(entry.monthsBack),
-      createdAt: monthsAgo(entry.monthsBack),
+      ...at(monthsAgo(entry.monthsBack)),
     })),
     {
       id: newId(),
@@ -281,13 +339,25 @@ export function createSeedInvoices(projects: Project[]): Invoice[] {
       clientId: gipszkarton?.clientId,
       status: "paid",
       items: [
-        { id: newId(), description: "Gipszkarton anyag", quantity: 1, unit: "tétel", unitPrice: 140000 },
-        { id: newId(), description: "Szerelési munkadíj", quantity: 16, unit: "óra", unitPrice: 12500 },
+        {
+          id: newId(),
+          description: "Gipszkarton anyag",
+          quantity: 1,
+          unit: "tétel",
+          unitPrice: 140000,
+        },
+        {
+          id: newId(),
+          description: "Szerelési munkadíj",
+          quantity: 16,
+          unit: "óra",
+          unitPrice: 12500,
+        },
       ],
       issueDate: daysAgo(12),
       dueDate: daysAgo(2),
       paidAt: daysAgo(3),
-      createdAt: daysAgo(12),
+      ...at(daysAgo(12)),
     },
     {
       id: newId(),
@@ -295,11 +365,17 @@ export function createSeedInvoices(projects: Project[]): Invoice[] {
       clientId: projects[3]?.clientId,
       status: "issued",
       items: [
-        { id: newId(), description: "Garázs villanyszerelés", quantity: 1, unit: "tétel", unitPrice: 185000 },
+        {
+          id: newId(),
+          description: "Garázs villanyszerelés",
+          quantity: 1,
+          unit: "tétel",
+          unitPrice: 185000,
+        },
       ],
       issueDate: daysAgo(38),
       dueDate: daysAgo(14),
-      createdAt: daysAgo(38),
+      ...at(daysAgo(38)),
     },
     {
       id: newId(),
@@ -308,12 +384,24 @@ export function createSeedInvoices(projects: Project[]): Invoice[] {
       clientId: festes?.clientId,
       status: "issued",
       items: [
-        { id: newId(), description: "Festék, glettanyag", quantity: 1, unit: "tétel", unitPrice: 60000 },
-        { id: newId(), description: "Festési munkadíj", quantity: 12, unit: "óra", unitPrice: 12500 },
+        {
+          id: newId(),
+          description: "Festék, glettanyag",
+          quantity: 1,
+          unit: "tétel",
+          unitPrice: 60000,
+        },
+        {
+          id: newId(),
+          description: "Festési munkadíj",
+          quantity: 12,
+          unit: "óra",
+          unitPrice: 12500,
+        },
       ],
       issueDate: daysAgo(1),
       dueDate: daysAhead(7),
-      createdAt: daysAgo(1),
+      ...at(daysAgo(1)),
     },
   ];
 }
@@ -327,7 +415,7 @@ export function createSeedLeads(): Lead[] {
       address: "1134 Budapest, Váci út 76.",
       source: "google_business",
       note: "Google Cégem profilról érkezett érdeklődés: garázskapu javítás.",
-      createdAt: daysAgo(1),
+      ...at(daysAgo(1)),
     },
     {
       id: newId(),
@@ -336,7 +424,7 @@ export function createSeedLeads(): Lead[] {
       address: "1201 Budapest, Kossuth Lajos utca 22.",
       source: "google_sheets",
       note: "Weboldal kapcsolatfelvételi űrlap → Google Sheets importból.",
-      createdAt: daysAgo(2),
+      ...at(daysAgo(2)),
     },
   ];
 }

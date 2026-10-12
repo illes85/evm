@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import type { Quote } from "../../types/domain";
-import { useAppStore } from "../../store/useAppStore";
+import { useClient } from "../../store/selectors";
 import { docTotal, formatCurrency, formatDate } from "../../lib/format";
 import { QUOTE_STATUS_CONFIG } from "../../lib/documentStatus";
 import { Badge } from "../ui/Badge";
 import { Card } from "../ui/Card";
 
 export function QuoteRow({ quote }: { quote: Quote }) {
-  const client = useAppStore((s) => s.clients.find((c) => c.id === quote.clientId));
+  const client = useClient(quote.clientId);
   const status = QUOTE_STATUS_CONFIG[quote.status];
 
   return (

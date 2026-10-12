@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import type { Invoice } from "../../types/domain";
-import { useAppStore } from "../../store/useAppStore";
+import { useClient } from "../../store/selectors";
 import { docTotal, formatCurrency, formatDate } from "../../lib/format";
 import { INVOICE_STATUS_CONFIG } from "../../lib/documentStatus";
 import { Badge } from "../ui/Badge";
 import { Card } from "../ui/Card";
 
 export function InvoiceRow({ invoice }: { invoice: Invoice }) {
-  const client = useAppStore((s) => s.clients.find((c) => c.id === invoice.clientId));
+  const client = useClient(invoice.clientId);
   const status = INVOICE_STATUS_CONFIG[invoice.status];
 
   return (

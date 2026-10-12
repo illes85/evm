@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react";
-import { useAppStore } from "../store/useAppStore";
+import { useQuotes } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { FinancesTabs } from "../components/documents/FinancesTabs";
 import { QuoteRow } from "../components/documents/QuoteRow";
@@ -8,7 +8,7 @@ import { Fab } from "../components/ui/Fab";
 
 export default function QuotesPage() {
   usePageTitle("Ajánlatok");
-  const quotes = useAppStore((s) => s.quotes);
+  const quotes = useQuotes();
   const sorted = [...quotes].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (

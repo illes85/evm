@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useAppStore } from "../store/useAppStore";
+import { useClients, useInvoices, useProjects, useQuotes } from "../store/selectors";
 import type { Client, Invoice, Project, Quote } from "../types/domain";
 
 export type NotificationSeverity = "danger" | "warning" | "info";
@@ -104,10 +104,10 @@ export function computeNotifications(
 }
 
 export function useNotifications(): AppNotification[] {
-  const projects = useAppStore((s) => s.projects);
-  const quotes = useAppStore((s) => s.quotes);
-  const invoices = useAppStore((s) => s.invoices);
-  const clients = useAppStore((s) => s.clients);
+  const projects = useProjects();
+  const quotes = useQuotes();
+  const invoices = useInvoices();
+  const clients = useClients();
 
   return useMemo(
     () => computeNotifications(projects, quotes, invoices, clients),

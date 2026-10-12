@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useAppStore } from "../store/useAppStore";
+import { useInvoices, useProjects, useQuotes } from "../store/selectors";
 import { docTotal } from "./format";
 import type { Invoice, Project, ProjectStatus, Quote } from "../types/domain";
 
@@ -239,9 +239,9 @@ export function statusCounts(projects: Project[]): Record<ProjectStatus, number>
 }
 
 export function useDashboard() {
-  const projects = useAppStore((s) => s.projects);
-  const quotes = useAppStore((s) => s.quotes);
-  const invoices = useAppStore((s) => s.invoices);
+  const projects = useProjects();
+  const quotes = useQuotes();
+  const invoices = useInvoices();
 
   return useMemo(
     () => ({

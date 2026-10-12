@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { CalendarDays } from "lucide-react";
 import type { Project } from "../../types/domain";
-import { useAppStore } from "../../store/useAppStore";
+import { useClient } from "../../store/selectors";
 import { statusConfig } from "../../lib/projectStatus";
 
 const dayFormatter = new Intl.DateTimeFormat("hu-HU", { weekday: "short", day: "numeric" });
@@ -24,7 +24,7 @@ function dayLabel(project: Project): string {
 }
 
 function ScheduleRow({ project }: { project: Project }) {
-  const client = useAppStore((s) => s.clients.find((c) => c.id === project.clientId));
+  const client = useClient(project.clientId);
   const status = statusConfig(project.status);
 
   return (

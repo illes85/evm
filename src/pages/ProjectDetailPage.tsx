@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useAppStore } from "../store/useAppStore";
+import { useClient, useInvoices, useProject, useQuotes } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { statusConfig, statusVars, PROJECT_STATUSES } from "../lib/projectStatus";
 import { formatCurrency, formatDate, formatDateTime } from "../lib/format";
@@ -26,10 +27,10 @@ import { cx } from "../lib/cx";
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const project = useAppStore((s) => s.projects.find((p) => p.id === id));
-  const client = useAppStore((s) => s.clients.find((c) => c.id === project?.clientId));
-  const allQuotes = useAppStore((s) => s.quotes);
-  const allInvoices = useAppStore((s) => s.invoices);
+  const project = useProject(id);
+  const client = useClient(project?.clientId);
+  const allQuotes = useQuotes();
+  const allInvoices = useInvoices();
   const quotes = useMemo(() => allQuotes.filter((q) => q.projectId === id), [allQuotes, id]);
   const invoices = useMemo(() => allInvoices.filter((i) => i.projectId === id), [allInvoices, id]);
   const setProjectStatus = useAppStore((s) => s.setProjectStatus);

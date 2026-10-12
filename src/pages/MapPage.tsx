@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import { useAppStore } from "../store/useAppStore";
+import { useProjects } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { PROJECT_STATUSES, statusConfig } from "../lib/projectStatus";
 import { MAP_TILE_ATTRIBUTION, MAP_TILE_URL } from "../lib/mapTiles";
@@ -72,7 +73,7 @@ function PinLabels() {
 
 export default function MapPage() {
   usePageTitle("Térkép");
-  const projects = useAppStore((s) => s.projects);
+  const projects = useProjects();
   const base = useAppStore((s) => s.settings.profile.location);
 
   const [tilesFailed, setTilesFailed] = useState(false);

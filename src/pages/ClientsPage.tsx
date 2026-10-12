@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Search, Users } from "lucide-react";
-import { useAppStore } from "../store/useAppStore";
+import { useClients } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { ClientCard } from "../components/clients/ClientCard";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -8,7 +8,7 @@ import { Fab } from "../components/ui/Fab";
 
 export default function ClientsPage() {
   usePageTitle("Ügyfelek");
-  const clients = useAppStore((s) => s.clients);
+  const clients = useClients();
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
+import { useClients, useInvoice, useProjects, useQuotes } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { inputClass } from "../lib/formStyles";
 import { nextDocumentNumber } from "../lib/documentStatus";
@@ -23,11 +24,11 @@ export default function InvoiceFormPage() {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
 
-  const existing = useAppStore((s) => s.invoices.find((i) => i.id === id));
-  const projects = useAppStore((s) => s.projects);
-  const clients = useAppStore((s) => s.clients);
-  const quotes = useAppStore((s) => s.quotes);
-  const invoices = useAppStore((s) => s.invoices);
+  const existing = useInvoice(id);
+  const projects = useProjects();
+  const clients = useClients();
+  const quotes = useQuotes();
+  const everyInvoiceEverIssued = useAppStore((s) => s.invoices);
   const addInvoice = useAppStore((s) => s.addInvoice);
   const updateInvoice = useAppStore((s) => s.updateInvoice);
 
@@ -59,7 +60,7 @@ export default function InvoiceFormPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const payload = {
-      number: existing?.number ?? nextDocumentNumber(invoices, "SZ"),
+      number: existing?.number ?? nextDocumentNumber(everyInvoiceEverIssued, "SZ"),
       projectId: projectId || undefined,
       clientId: clientId || undefined,
       quoteId: existing?.quoteId ?? sourceQuote?.id,

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
+import { useClient } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { inputClass, textareaClass } from "../lib/formStyles";
 import { Field } from "../components/ui/Field";
@@ -13,7 +14,7 @@ export default function ClientFormPage() {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
 
-  const existing = useAppStore((s) => s.clients.find((c) => c.id === id));
+  const existing = useClient(id);
   const addClient = useAppStore((s) => s.addClient);
   const updateClient = useAppStore((s) => s.updateClient);
 

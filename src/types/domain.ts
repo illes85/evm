@@ -1,17 +1,21 @@
-export type ProjectStatus =
-  | "lead"
-  | "quoting"
-  | "scheduled"
-  | "in_progress"
-  | "done"
-  | "invoiced";
+/** Fields every synced record carries. `updatedAt` decides which side wins
+ * when the same record changed in two places, and `deletedAt` keeps a
+ * tombstone around so a delete made offline still reaches the server (a
+ * removed row would simply look like a row the other side never had). */
+export interface SyncMeta {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+}
+
+export type ProjectStatus = "lead" | "quoting" | "scheduled" | "in_progress" | "done" | "invoiced";
 
 export interface GeoPoint {
   lat: number;
   lng: number;
 }
 
-export interface Client {
+export interface Client extends SyncMeta {
   id: string;
   name: string;
   companyName?: string;
@@ -20,7 +24,6 @@ export interface Client {
   address?: string;
   location?: GeoPoint;
   notes?: string;
-  createdAt: string;
 }
 
 export interface ProjectNote {
@@ -30,7 +33,7 @@ export interface ProjectNote {
   source: "manual" | "voice";
 }
 
-export interface Project {
+export interface Project extends SyncMeta {
   id: string;
   title: string;
   clientId?: string;
@@ -42,8 +45,6 @@ export interface Project {
   dueDate?: string;
   description?: string;
   notes: ProjectNote[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface DocLineItem {
@@ -56,7 +57,7 @@ export interface DocLineItem {
 
 export type QuoteStatus = "draft" | "sent" | "accepted" | "rejected";
 
-export interface Quote {
+export interface Quote extends SyncMeta {
   id: string;
   number: string;
   projectId?: string;
@@ -65,12 +66,11 @@ export interface Quote {
   items: DocLineItem[];
   validUntil?: string;
   note?: string;
-  createdAt: string;
 }
 
 export type InvoiceStatus = "draft" | "issued" | "paid" | "overdue";
 
-export interface Invoice {
+export interface Invoice extends SyncMeta {
   id: string;
   number: string;
   projectId?: string;
@@ -81,12 +81,11 @@ export interface Invoice {
   issueDate: string;
   dueDate: string;
   paidAt?: string;
-  createdAt: string;
 }
 
 export type LeadSource = "manual" | "google_sheets" | "google_business";
 
-export interface Lead {
+export interface Lead extends SyncMeta {
   id: string;
   name: string;
   phone?: string;
@@ -94,18 +93,11 @@ export interface Lead {
   address?: string;
   source: LeadSource;
   note?: string;
-  createdAt: string;
   convertedProjectId?: string;
 }
 
 export type PlanTier = "basic" | "premium";
-export type PaletteId =
-  | "ocean"
-  | "sunset"
-  | "forest"
-  | "midnight"
-  | "lavender"
-  | "rose";
+export type PaletteId = "ocean" | "sunset" | "forest" | "midnight" | "lavender" | "rose";
 export type ThemeMode = "light" | "dark" | "system";
 
 export interface BusinessProfile {

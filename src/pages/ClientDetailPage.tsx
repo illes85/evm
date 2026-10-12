@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Mail, MapPin, Pencil, Phone, Plus, Trash2 } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
+import { useClient, useProjects } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -12,8 +13,8 @@ import { LayoutList } from "lucide-react";
 export default function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const client = useAppStore((s) => s.clients.find((c) => c.id === id));
-  const allProjects = useAppStore((s) => s.projects);
+  const client = useClient(id);
+  const allProjects = useProjects();
   const projects = useMemo(() => allProjects.filter((p) => p.clientId === id), [allProjects, id]);
   const deleteClient = useAppStore((s) => s.deleteClient);
 

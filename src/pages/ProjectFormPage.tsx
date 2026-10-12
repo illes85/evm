@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
+import { useClients, useProject } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { PROJECT_STATUSES } from "../lib/projectStatus";
 import { inputClass, textareaClass } from "../lib/formStyles";
@@ -16,8 +17,8 @@ export default function ProjectFormPage() {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
 
-  const existing = useAppStore((s) => s.projects.find((p) => p.id === id));
-  const clients = useAppStore((s) => s.clients);
+  const existing = useProject(id);
+  const clients = useClients();
   const addProject = useAppStore((s) => s.addProject);
   const updateProject = useAppStore((s) => s.updateProject);
 

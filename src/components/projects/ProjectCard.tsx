@@ -1,14 +1,14 @@
 import { Link } from "react-router-dom";
 import { CalendarClock, MapPin } from "lucide-react";
 import type { Project } from "../../types/domain";
-import { useAppStore } from "../../store/useAppStore";
+import { useClient } from "../../store/selectors";
 import { statusConfig, statusVars } from "../../lib/projectStatus";
 import { formatCurrency, formatDate } from "../../lib/format";
 import { Badge } from "../ui/Badge";
 import { Card } from "../ui/Card";
 
 export function ProjectCard({ project }: { project: Project }) {
-  const client = useAppStore((s) => s.clients.find((c) => c.id === project.clientId));
+  const client = useClient(project.clientId);
   const status = statusConfig(project.status);
   const dateLabel = project.scheduledDate ?? project.dueDate;
 

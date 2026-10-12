@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowRight, FileSpreadsheet, MapPinned, Plus, Trash2, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
+import { useLeads } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { formatRelative } from "../lib/format";
 import { inputClass } from "../lib/formStyles";
@@ -21,7 +22,7 @@ const SOURCE_LABEL: Record<LeadSource, { label: string; icon: typeof FileSpreads
 export default function LeadsPage() {
   usePageTitle("Érdeklődők");
   const navigate = useNavigate();
-  const leads = useAppStore((s) => s.leads);
+  const leads = useLeads();
   const addLead = useAppStore((s) => s.addLead);
   const deleteLead = useAppStore((s) => s.deleteLead);
   const convertLeadToProject = useAppStore((s) => s.convertLeadToProject);

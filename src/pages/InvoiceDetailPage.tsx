@@ -1,6 +1,7 @@
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, Pencil, Trash2 } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
+import { useClient, useInvoice } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { INVOICE_STATUS_CONFIG } from "../lib/documentStatus";
 import { docTotal, formatCurrency, formatDate } from "../lib/format";
@@ -17,8 +18,8 @@ const STATUS_OPTIONS: InvoiceStatus[] = ["draft", "issued", "paid", "overdue"];
 export default function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const invoice = useAppStore((s) => s.invoices.find((i) => i.id === id));
-  const client = useAppStore((s) => s.clients.find((c) => c.id === invoice?.clientId));
+  const invoice = useInvoice(id);
+  const client = useClient(invoice?.clientId);
   const profile = useAppStore((s) => s.settings.profile);
   const updateInvoice = useAppStore((s) => s.updateInvoice);
   const deleteInvoice = useAppStore((s) => s.deleteInvoice);

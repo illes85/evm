@@ -1,6 +1,7 @@
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Pencil, Receipt, Trash2 } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
+import { useClient, useQuote } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { QUOTE_STATUS_CONFIG } from "../lib/documentStatus";
 import { docTotal, formatCurrency, formatDate } from "../lib/format";
@@ -17,8 +18,8 @@ const STATUS_OPTIONS: QuoteStatus[] = ["draft", "sent", "accepted", "rejected"];
 export default function QuoteDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const quote = useAppStore((s) => s.quotes.find((q) => q.id === id));
-  const client = useAppStore((s) => s.clients.find((c) => c.id === quote?.clientId));
+  const quote = useQuote(id);
+  const client = useClient(quote?.clientId);
   const profile = useAppStore((s) => s.settings.profile);
   const updateQuote = useAppStore((s) => s.updateQuote);
   const deleteQuote = useAppStore((s) => s.deleteQuote);

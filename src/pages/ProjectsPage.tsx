@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Kanban, LayoutList, Search } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-import { useAppStore } from "../store/useAppStore";
+import { useProjects } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { ProjectKanban } from "../components/projects/ProjectKanban";
 import { ProjectCard } from "../components/projects/ProjectCard";
@@ -15,7 +15,7 @@ type ViewMode = "list" | "kanban";
 
 export default function ProjectsPage() {
   usePageTitle("Projektek");
-  const projects = useAppStore((s) => s.projects);
+  const projects = useProjects();
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState<ViewMode>("list");
   const [query, setQuery] = useState("");

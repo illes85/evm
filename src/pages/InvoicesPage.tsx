@@ -1,5 +1,5 @@
 import { Receipt } from "lucide-react";
-import { useAppStore } from "../store/useAppStore";
+import { useInvoices } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { FinancesTabs } from "../components/documents/FinancesTabs";
 import { InvoiceRow } from "../components/documents/InvoiceRow";
@@ -8,7 +8,7 @@ import { Fab } from "../components/ui/Fab";
 
 export default function InvoicesPage() {
   usePageTitle("Számlák");
-  const invoices = useAppStore((s) => s.invoices);
+  const invoices = useInvoices();
   const sorted = [...invoices].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );

@@ -21,11 +21,28 @@ import type {
   ProjectStatus,
   Quote,
   Settings,
+  SyncMeta,
   ThemeMode,
 } from "../types/domain";
 
 const seedClients = createSeedClients();
 const seedProjects = createSeedProjects(seedClients);
+
+const nowIso = () => new Date().toISOString();
+
+/** Timestamps for a freshly created record. */
+function stamp(): { createdAt: string; updatedAt: string } {
+  const now = nowIso();
+  return { createdAt: now, updatedAt: now };
+}
+
+/** Deleting marks the record instead of dropping it: the tombstone is what
+ * tells the server (and the user's other devices) that it went away. Rows are
+ * purged for real once the server has acknowledged the deletion. */
+function tombstone<T extends SyncMeta>(record: T): T {
+  const now = nowIso();
+  return { ...record, deletedAt: now, updatedAt: now };
+}
 
 interface AppState {
   clients: Client[];
@@ -35,25 +52,25 @@ interface AppState {
   leads: Lead[];
   settings: Settings;
 
-  addClient: (client: Omit<Client, "id" | "createdAt">) => Client;
+  addClient: (client: Omit<Client, keyof SyncMeta | "id">) => Client;
   updateClient: (id: string, patch: Partial<Client>) => void;
   deleteClient: (id: string) => void;
 
-  addProject: (project: Omit<Project, "id" | "createdAt" | "updatedAt" | "notes">) => Project;
+  addProject: (project: Omit<Project, keyof SyncMeta | "id" | "notes">) => Project;
   updateProject: (id: string, patch: Partial<Project>) => void;
   deleteProject: (id: string) => void;
   setProjectStatus: (id: string, status: ProjectStatus) => void;
   addProjectNote: (id: string, text: string, source?: ProjectNote["source"]) => void;
 
-  addQuote: (quote: Omit<Quote, "id" | "createdAt">) => Quote;
+  addQuote: (quote: Omit<Quote, keyof SyncMeta | "id">) => Quote;
   updateQuote: (id: string, patch: Partial<Quote>) => void;
   deleteQuote: (id: string) => void;
 
-  addInvoice: (invoice: Omit<Invoice, "id" | "createdAt">) => Invoice;
+  addInvoice: (invoice: Omit<Invoice, keyof SyncMeta | "id">) => Invoice;
   updateInvoice: (id: string, patch: Partial<Invoice>) => void;
   deleteInvoice: (id: string) => void;
 
-  addLead: (lead: Omit<Lead, "id" | "createdAt">) => Lead;
+  addLead: (lead: Omit<Lead, keyof SyncMeta | "id">) => Lead;
   updateLead: (id: string, patch: Partial<Lead>) => void;
   deleteLead: (id: string) => void;
   convertLeadToProject: (id: string) => Project | null;
@@ -75,22 +92,30 @@ export const useAppStore = create<AppState>()(
       settings: createSeedSettings(),
 
       addClient: (client) => {
-        const created: Client = { ...client, id: newId(), createdAt: new Date().toISOString() };
+        const created: Client = { ...client, id: newId(), ...stamp() };
         set((s) => ({ clients: [created, ...s.clients] }));
         return created;
       },
       updateClient: (id, patch) => {
         set((s) => ({
-          clients: s.clients.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+          clients: s.clients.map((c) =>
+            c.id === id ? { ...c, ...patch, updatedAt: nowIso() } : c,
+          ),
         }));
       },
       deleteClient: (id) => {
-        set((s) => ({ clients: s.clients.filter((c) => c.id !== id) }));
+        set((s) => ({ clients: s.clients.map((c) => (c.id === id ? tombstone(c) : c)) }));
       },
 
       addProject: (project) => {
         const now = new Date().toISOString();
-        const created: Project = { ...project, id: newId(), notes: [], createdAt: now, updatedAt: now };
+        const created: Project = {
+          ...project,
+          id: newId(),
+          notes: [],
+          createdAt: now,
+          updatedAt: now,
+        };
         set((s) => ({ projects: [created, ...s.projects] }));
         return created;
       },
@@ -102,7 +127,7 @@ export const useAppStore = create<AppState>()(
         }));
       },
       deleteProject: (id) => {
-        set((s) => ({ projects: s.projects.filter((p) => p.id !== id) }));
+        set((s) => ({ projects: s.projects.map((p) => (p.id === id ? tombstone(p) : p)) }));
       },
       setProjectStatus: (id, status) => {
         set((s) => ({
@@ -112,7 +137,12 @@ export const useAppStore = create<AppState>()(
         }));
       },
       addProjectNote: (id, text, source = "manual") => {
-        const note: ProjectNote = { id: newId(), text, createdAt: new Date().toISOString(), source };
+        const note: ProjectNote = {
+          id: newId(),
+          text,
+          createdAt: new Date().toISOString(),
+          source,
+        };
         set((s) => ({
           projects: s.projects.map((p) =>
             p.id === id
@@ -123,41 +153,47 @@ export const useAppStore = create<AppState>()(
       },
 
       addQuote: (quote) => {
-        const created: Quote = { ...quote, id: newId(), createdAt: new Date().toISOString() };
+        const created: Quote = { ...quote, id: newId(), ...stamp() };
         set((s) => ({ quotes: [created, ...s.quotes] }));
         return created;
       },
       updateQuote: (id, patch) => {
-        set((s) => ({ quotes: s.quotes.map((q) => (q.id === id ? { ...q, ...patch } : q)) }));
+        set((s) => ({
+          quotes: s.quotes.map((q) => (q.id === id ? { ...q, ...patch, updatedAt: nowIso() } : q)),
+        }));
       },
       deleteQuote: (id) => {
-        set((s) => ({ quotes: s.quotes.filter((q) => q.id !== id) }));
+        set((s) => ({ quotes: s.quotes.map((q) => (q.id === id ? tombstone(q) : q)) }));
       },
 
       addInvoice: (invoice) => {
-        const created: Invoice = { ...invoice, id: newId(), createdAt: new Date().toISOString() };
+        const created: Invoice = { ...invoice, id: newId(), ...stamp() };
         set((s) => ({ invoices: [created, ...s.invoices] }));
         return created;
       },
       updateInvoice: (id, patch) => {
         set((s) => ({
-          invoices: s.invoices.map((i) => (i.id === id ? { ...i, ...patch } : i)),
+          invoices: s.invoices.map((i) =>
+            i.id === id ? { ...i, ...patch, updatedAt: nowIso() } : i,
+          ),
         }));
       },
       deleteInvoice: (id) => {
-        set((s) => ({ invoices: s.invoices.filter((i) => i.id !== id) }));
+        set((s) => ({ invoices: s.invoices.map((i) => (i.id === id ? tombstone(i) : i)) }));
       },
 
       addLead: (lead) => {
-        const created: Lead = { ...lead, id: newId(), createdAt: new Date().toISOString() };
+        const created: Lead = { ...lead, id: newId(), ...stamp() };
         set((s) => ({ leads: [created, ...s.leads] }));
         return created;
       },
       updateLead: (id, patch) => {
-        set((s) => ({ leads: s.leads.map((l) => (l.id === id ? { ...l, ...patch } : l)) }));
+        set((s) => ({
+          leads: s.leads.map((l) => (l.id === id ? { ...l, ...patch, updatedAt: nowIso() } : l)),
+        }));
       },
       deleteLead: (id) => {
-        set((s) => ({ leads: s.leads.filter((l) => l.id !== id) }));
+        set((s) => ({ leads: s.leads.map((l) => (l.id === id ? tombstone(l) : l)) }));
       },
       convertLeadToProject: (id) => {
         const lead = get().leads.find((l) => l.id === id);
@@ -169,7 +205,9 @@ export const useAppStore = create<AppState>()(
           description: lead.note,
         });
         set((s) => ({
-          leads: s.leads.map((l) => (l.id === id ? { ...l, convertedProjectId: project.id } : l)),
+          leads: s.leads.map((l) =>
+            l.id === id ? { ...l, convertedProjectId: project.id, updatedAt: nowIso() } : l,
+          ),
         }));
         return project;
       },
@@ -182,7 +220,23 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "evm-store",
-      version: 1,
+      version: 2,
+      // v1 records predate sync metadata: without updatedAt the first sync
+      // could not tell which side was newer, so they inherit createdAt.
+      migrate: (persisted, version) => {
+        if (version >= 2) return persisted as AppState;
+        const state = persisted as AppState;
+        const backfill = <T extends { createdAt: string; updatedAt?: string }>(rows: T[] = []) =>
+          rows.map((row) => ({ ...row, updatedAt: row.updatedAt ?? row.createdAt }));
+        return {
+          ...state,
+          clients: backfill(state.clients),
+          projects: backfill(state.projects),
+          quotes: backfill(state.quotes),
+          invoices: backfill(state.invoices),
+          leads: backfill(state.leads),
+        } as AppState;
+      },
     },
   ),
 );

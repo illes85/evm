@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
+import { useClients, useProjects, useQuote } from "../store/selectors";
 import { usePageTitle } from "../lib/usePageTitle";
 import { inputClass, textareaClass } from "../lib/formStyles";
 import { nextDocumentNumber } from "../lib/documentStatus";
@@ -18,10 +19,10 @@ export default function QuoteFormPage() {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
 
-  const existing = useAppStore((s) => s.quotes.find((q) => q.id === id));
-  const projects = useAppStore((s) => s.projects);
-  const clients = useAppStore((s) => s.clients);
-  const quotes = useAppStore((s) => s.quotes);
+  const existing = useQuote(id);
+  const projects = useProjects();
+  const clients = useClients();
+  const everyQuoteEverIssued = useAppStore((s) => s.quotes);
   const addQuote = useAppStore((s) => s.addQuote);
   const updateQuote = useAppStore((s) => s.updateQuote);
 
@@ -50,7 +51,7 @@ export default function QuoteFormPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const payload = {
-      number: existing?.number ?? nextDocumentNumber(quotes, "AJ"),
+      number: existing?.number ?? nextDocumentNumber(everyQuoteEverIssued, "AJ"),
       projectId: projectId || undefined,
       clientId: clientId || undefined,
       status,

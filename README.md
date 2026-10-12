@@ -66,6 +66,44 @@ használja (Chrome-ban működik igazán jól). Amikor lesz backend:
 - a lead-integrációk valódi OAuth-alapú Google Sheets / Google Business
   Profile kapcsolatot kapnak.
 
+## Adatmodell és a szinkron előkészítése
+
+Minden szinkronizálandó rekord hordoz három mezőt (`SyncMeta`):
+`createdAt`, `updatedAt` és `deletedAt`. Az `updatedAt` dönti el, melyik
+oldal a frissebb, ha ugyanaz a rekord két eszközön is változott.
+
+A törlés **nem** dobja el a sort, hanem `deletedAt`-et állít rajta
+(„sírkő"). Erre azért van szükség, mert egy net nélkül végzett törlés
+máskülönben megkülönböztethetetlen lenne attól, hogy a másik oldal sosem
+látta azt a rekordot — vagyis a törölt tétel a következő szinkronnál
+visszaéledne. A sírköveket majd a szerver visszaigazolása után lehet
+véglegesen kitakarítani.
+
+Ebből következik, hogy a felület soha nem olvassa közvetlenül a store
+listáit: minden nézet a `src/store/selectors.ts` hookjain keresztül kér
+adatot, és azok szűrik ki a törölteket. Egyetlen szándékos kivétel van, az
+ajánlat- és számlasorszámozás: az a teljes listát nézi, hogy egy törölt
+dokumentum sorszámát se osszuk ki újra.
+
+## Élesítés és visszaállítás
+
+A `main` ágra érkező minden változtatást a
+`.github/workflows/deploy.yml` automatikusan kitesz a
+https://illes85.github.io/evm/ címre, kb. másfél perc alatt.
+
+**Visszaállítás, ha egy változtatás rossznak bizonyul.** Két út van, mindkettő
+pár perc, és egyik sem igényel fejlesztői környezetet:
+
+1. *A GitHub felületéről, kattintással:* **Actions** → a bal oldali listából
+   „Deploy to GitHub Pages" → a legutolsó **zöld** futás, ami még jó volt →
+   jobb fent **Re-run all jobs**. Ez újra kiteszi azt a korábbi állapotot.
+2. *Git-tel:* `git revert <commit>` a `main` ágon, majd push — ez egy új
+   committal visszavonja a hibás változtatást, és magától újra élesít. Az
+   előzmény megmarad, semmi nem vész el.
+
+Mindkettő visszafordítható: a „rossz" commit nem tűnik el, bármikor újra
+elővehető.
+
 ## Térkép csempeszolgáltató
 
 A térkép alapértelmezésben az OpenStreetMap nyilvános csempéit tölti be, ami
