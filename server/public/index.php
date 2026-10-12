@@ -10,7 +10,12 @@
 
 declare(strict_types=1);
 
-$root = dirname(__DIR__);
+// Kétféle elrendezésben is működnie kell, és a kettőt nem szabad
+// összekeverni: a kódtárban a belépési pont a public/ mappában van, a
+// forrás és a beállítás eggyel feljebb; a tárhelyen viszont minden egyetlen
+// api/ mappába kerül. Ezért nem feltételezzük a szerkezetet, hanem
+// megkeressük, hol van a src/ könyvtár.
+$root = is_dir(__DIR__ . '/src') ? __DIR__ : dirname(__DIR__);
 
 require $root . '/src/Db.php';
 require $root . '/src/Http.php';

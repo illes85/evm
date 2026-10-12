@@ -1,2 +1,11 @@
-# A forrásfájlok nem hívhatók közvetlenül.
-Require all denied
+# Védelem mélységében: a forrásfájlok közvetlenül nem hívhatók. Csak akkor
+# lép életbe, ha a szolgáltató engedi — enélkül sem sérül semmi, mert ezek a
+# fájlok kizárólag osztályokat definiálnak, önmagukban nem csinálnak semmit.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    <IfModule mod_authz_host.c>
+        Deny from all
+    </IfModule>
+</IfModule>

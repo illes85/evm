@@ -1,10 +1,8 @@
-# Szebb útvonalak, ha a tárhelyen van mod_rewrite. Ha nincs, az API akkor is
-# működik a ?r=... formával, ezért a blokk hibatűrő.
+# Szebb útvonalak, ha a tárhelyen van mod_rewrite. Az API enélkül is működik
+# (?r=... formában), ezért minden sor feltételes: ha a szolgáltató nem engedi
+# ezeket a beállításokat, az sem okozhat hibát.
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^(.*)$ index.php?r=$1 [QSA,L]
 </IfModule>
-
-# Böngészőből ne lehessen listázni a könyvtárat.
-Options -Indexes
