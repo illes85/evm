@@ -137,6 +137,48 @@ body {
   background-size: 32px 32px;
 }
 
+/* Map pins: the dot marks the coordinate, the label names what is there. */
+.map-pin {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.map-pin__dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+}
+.map-pin__label {
+  position: absolute;
+  left: 21px;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 9.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background-color: color-mix(in oklab, var(--surface) 92%, transparent);
+  padding: 1px 5px;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
+}
+.map-pin__label--left {
+  left: auto;
+  right: 21px;
+}
+.map--hide-labels .map-pin__label {
+  display: none;
+}
+
 /* Hide scrollbars on the swipeable kanban track while keeping it scrollable */
 .no-scrollbar {
   scrollbar-width: none;

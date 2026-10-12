@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import { useAppStore } from "../store/useAppStore";
 import { usePageTitle } from "../lib/usePageTitle";
@@ -12,14 +12,62 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { cx } from "../lib/cx";
 import { MapPin, WifiOff } from "lucide-react";
 
-function markerIcon(color: string) {
+/** The icon is built as an HTML string for Leaflet, so anything coming from
+ * user data has to be escaped on the way in. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** A dot pinned to the exact coordinate, with the name beside it. The label is
+ * positioned out of the 16×16 icon box so the anchor stays on the dot, and it
+ * ignores pointer events so a long name never swallows a neighbouring pin's
+ * clicks. */
+function markerIcon(color: string, label: string) {
   return L.divIcon({
     className: "",
-    html: `<span style="display:block;width:16px;height:16px;border-radius:9999px;background:${color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.35)"></span>`,
+    html: `<span class="map-pin">
+      <span class="map-pin__dot" style="background:${color}"></span>
+      <span class="map-pin__label">${escapeHtml(label)}</span>
+    </span>`,
     iconSize: [16, 16],
     iconAnchor: [8, 8],
     popupAnchor: [0, -8],
   });
+}
+
+/** Labels are useful at street and district zoom, but turn into noise when the
+ * whole country is in view. */
+const LABEL_MIN_ZOOM = 12;
+
+/** Keeps labels inside the map: they sit to the right of their dot, and flip
+ * to the left when that would run them past the edge. Done on the DOM rather
+ * than in React state so panning never re-renders the markers. */
+function layOutPins(map: L.Map) {
+  const container = map.getContainer();
+  container.classList.toggle("map--hide-labels", map.getZoom() < LABEL_MIN_ZOOM);
+
+  const edge = container.getBoundingClientRect().right - 8;
+  for (const label of container.querySelectorAll<HTMLElement>(".map-pin__label")) {
+    label.classList.remove("map-pin__label--left");
+    if (label.getBoundingClientRect().right > edge) {
+      label.classList.add("map-pin__label--left");
+    }
+  }
+}
+
+function PinLabels() {
+  const map = useMapEvents({
+    zoomend: () => layOutPins(map),
+    moveend: () => layOutPins(map),
+    layeradd: () => layOutPins(map),
+  });
+
+  useEffect(() => layOutPins(map), [map]);
+  return null;
 }
 
 export default function MapPage() {
@@ -64,8 +112,10 @@ export default function MapPage() {
                 url={MAP_TILE_URL}
                 eventHandlers={{ tileerror: () => setTilesFailed(true) }}
               />
+              <PinLabels />
+
               {base && (
-                <Marker position={[base.lat, base.lng]} icon={markerIcon("#0f172a")}>
+                <Marker position={[base.lat, base.lng]} icon={markerIcon("#0f172a", "Székhely")}>
                   <Popup>Székhely</Popup>
                 </Marker>
               )}
@@ -75,7 +125,7 @@ export default function MapPage() {
                   <Marker
                     key={project.id}
                     position={[project.location!.lat, project.location!.lng]}
-                    icon={markerIcon(status.color)}
+                    icon={markerIcon(status.color, project.title)}
                   >
                     <Popup>
                       <div className="text-sm">
