@@ -8,6 +8,7 @@ import { Button } from "../components/ui/Button";
 import { PlanCard } from "../components/settings/PlanCard";
 import { ThemePicker } from "../components/settings/ThemePicker";
 import { IntegrationsCard } from "../components/settings/IntegrationsCard";
+import { AccountCard } from "../components/settings/AccountCard";
 
 export default function SettingsPage() {
   usePageTitle("Beállítások");
@@ -43,6 +44,11 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-5 px-4 pb-10 pt-4 md:px-6">
+      <section>
+        <h2 className="mb-2 px-0.5 text-sm font-semibold text-text-muted">Fiók és szinkron</h2>
+        <AccountCard />
+      </section>
+
       <section>
         <h2 className="mb-2 px-0.5 text-sm font-semibold text-text-muted">Csomag</h2>
         <PlanCard />

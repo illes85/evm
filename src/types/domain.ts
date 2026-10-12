@@ -8,6 +8,11 @@ export interface SyncMeta {
   deletedAt?: string;
 }
 
+/** Bármely szinkronizált rekord közös alakja. */
+export interface SyncRecord extends SyncMeta {
+  id: string;
+}
+
 export type ProjectStatus = "lead" | "quoting" | "scheduled" | "in_progress" | "done" | "invoiced";
 
 export interface GeoPoint {

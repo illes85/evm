@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/layout/AppShell";
 import { PageTitleProvider } from "./lib/usePageTitle";
 import { useThemeEffect } from "./theme/useThemeEffect";
+import { useSyncEngine } from "./lib/sync";
 import OverviewPage from "./pages/OverviewPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
@@ -19,12 +20,14 @@ import InvoiceFormPage from "./pages/InvoiceFormPage";
 import LeadsPage from "./pages/LeadsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
+import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 const MapPage = lazy(() => import("./pages/MapPage"));
 
 function ThemedRoutes() {
   useThemeEffect();
+  useSyncEngine();
 
   return (
     <Routes>
@@ -62,6 +65,7 @@ function ThemedRoutes() {
         />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/login" element={<LoginPage />} />
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>

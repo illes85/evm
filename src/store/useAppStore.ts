@@ -22,6 +22,7 @@ import type {
   Quote,
   Settings,
   SyncMeta,
+  SyncRecord,
   ThemeMode,
 } from "../types/domain";
 
@@ -29,6 +30,28 @@ const seedClients = createSeedClients();
 const seedProjects = createSeedProjects(seedClients);
 
 const nowIso = () => new Date().toISOString();
+
+/** A szerverrel szinkronizált gyűjtemények. */
+export const SYNC_TABLES = ["clients", "projects", "quotes", "invoices", "leads"] as const;
+export type SyncTable = (typeof SYNC_TABLES)[number];
+
+/** Minden helyi módosítás feljegyzi, hogy az adott rekord feltöltésre vár,
+ * és hogy a tárolt adat már nem csak a bemutató adathalmaz. */
+function touch(state: AppState, table: SyncTable, id: string) {
+  const ids = state.pending[table];
+  return {
+    hasUserData: true,
+    pending: ids.includes(id) ? state.pending : { ...state.pending, [table]: [...ids, id] },
+  };
+}
+
+const emptyPending = (): Record<SyncTable, string[]> => ({
+  clients: [],
+  projects: [],
+  quotes: [],
+  invoices: [],
+  leads: [],
+});
 
 /** Timestamps for a freshly created record. */
 function stamp(): { createdAt: string; updatedAt: string } {
@@ -51,6 +74,15 @@ interface AppState {
   invoices: Invoice[];
   leads: Lead[];
   settings: Settings;
+
+  /** Rekordok, amik még nem jutottak el a szerverre. */
+  pending: Record<SyncTable, string[]>;
+  /** Hamis, amíg csak a bemutató adatok vannak — belépéskor ezt eldobhatjuk. */
+  hasUserData: boolean;
+
+  applyServerChanges: (changes: Partial<Record<SyncTable, SyncRecord[]>>) => void;
+  clearPending: (table: SyncTable, ids: string[]) => void;
+  resetLocalData: () => void;
 
   addClient: (client: Omit<Client, keyof SyncMeta | "id">) => Client;
   updateClient: (id: string, patch: Partial<Client>) => void;
@@ -90,10 +122,12 @@ export const useAppStore = create<AppState>()(
       invoices: createSeedInvoices(seedProjects),
       leads: createSeedLeads(),
       settings: createSeedSettings(),
+      pending: emptyPending(),
+      hasUserData: false,
 
       addClient: (client) => {
         const created: Client = { ...client, id: newId(), ...stamp() };
-        set((s) => ({ clients: [created, ...s.clients] }));
+        set((s) => ({ clients: [created, ...s.clients], ...touch(s, "clients", created.id) }));
         return created;
       },
       updateClient: (id, patch) => {
@@ -101,10 +135,14 @@ export const useAppStore = create<AppState>()(
           clients: s.clients.map((c) =>
             c.id === id ? { ...c, ...patch, updatedAt: nowIso() } : c,
           ),
+          ...touch(s, "clients", id),
         }));
       },
       deleteClient: (id) => {
-        set((s) => ({ clients: s.clients.map((c) => (c.id === id ? tombstone(c) : c)) }));
+        set((s) => ({
+          clients: s.clients.map((c) => (c.id === id ? tombstone(c) : c)),
+          ...touch(s, "clients", id),
+        }));
       },
 
       addProject: (project) => {
@@ -116,7 +154,7 @@ export const useAppStore = create<AppState>()(
           createdAt: now,
           updatedAt: now,
         };
-        set((s) => ({ projects: [created, ...s.projects] }));
+        set((s) => ({ projects: [created, ...s.projects], ...touch(s, "projects", created.id) }));
         return created;
       },
       updateProject: (id, patch) => {
@@ -124,16 +162,21 @@ export const useAppStore = create<AppState>()(
           projects: s.projects.map((p) =>
             p.id === id ? { ...p, ...patch, updatedAt: new Date().toISOString() } : p,
           ),
+          ...touch(s, "projects", id),
         }));
       },
       deleteProject: (id) => {
-        set((s) => ({ projects: s.projects.map((p) => (p.id === id ? tombstone(p) : p)) }));
+        set((s) => ({
+          projects: s.projects.map((p) => (p.id === id ? tombstone(p) : p)),
+          ...touch(s, "projects", id),
+        }));
       },
       setProjectStatus: (id, status) => {
         set((s) => ({
           projects: s.projects.map((p) =>
             p.id === id ? { ...p, status, updatedAt: new Date().toISOString() } : p,
           ),
+          ...touch(s, "projects", id),
         }));
       },
       addProjectNote: (id, text, source = "manual") => {
@@ -149,26 +192,31 @@ export const useAppStore = create<AppState>()(
               ? { ...p, notes: [note, ...p.notes], updatedAt: new Date().toISOString() }
               : p,
           ),
+          ...touch(s, "projects", id),
         }));
       },
 
       addQuote: (quote) => {
         const created: Quote = { ...quote, id: newId(), ...stamp() };
-        set((s) => ({ quotes: [created, ...s.quotes] }));
+        set((s) => ({ quotes: [created, ...s.quotes], ...touch(s, "quotes", created.id) }));
         return created;
       },
       updateQuote: (id, patch) => {
         set((s) => ({
           quotes: s.quotes.map((q) => (q.id === id ? { ...q, ...patch, updatedAt: nowIso() } : q)),
+          ...touch(s, "quotes", id),
         }));
       },
       deleteQuote: (id) => {
-        set((s) => ({ quotes: s.quotes.map((q) => (q.id === id ? tombstone(q) : q)) }));
+        set((s) => ({
+          quotes: s.quotes.map((q) => (q.id === id ? tombstone(q) : q)),
+          ...touch(s, "quotes", id),
+        }));
       },
 
       addInvoice: (invoice) => {
         const created: Invoice = { ...invoice, id: newId(), ...stamp() };
-        set((s) => ({ invoices: [created, ...s.invoices] }));
+        set((s) => ({ invoices: [created, ...s.invoices], ...touch(s, "invoices", created.id) }));
         return created;
       },
       updateInvoice: (id, patch) => {
@@ -176,24 +224,32 @@ export const useAppStore = create<AppState>()(
           invoices: s.invoices.map((i) =>
             i.id === id ? { ...i, ...patch, updatedAt: nowIso() } : i,
           ),
+          ...touch(s, "invoices", id),
         }));
       },
       deleteInvoice: (id) => {
-        set((s) => ({ invoices: s.invoices.map((i) => (i.id === id ? tombstone(i) : i)) }));
+        set((s) => ({
+          invoices: s.invoices.map((i) => (i.id === id ? tombstone(i) : i)),
+          ...touch(s, "invoices", id),
+        }));
       },
 
       addLead: (lead) => {
         const created: Lead = { ...lead, id: newId(), ...stamp() };
-        set((s) => ({ leads: [created, ...s.leads] }));
+        set((s) => ({ leads: [created, ...s.leads], ...touch(s, "leads", created.id) }));
         return created;
       },
       updateLead: (id, patch) => {
         set((s) => ({
           leads: s.leads.map((l) => (l.id === id ? { ...l, ...patch, updatedAt: nowIso() } : l)),
+          ...touch(s, "leads", id),
         }));
       },
       deleteLead: (id) => {
-        set((s) => ({ leads: s.leads.map((l) => (l.id === id ? tombstone(l) : l)) }));
+        set((s) => ({
+          leads: s.leads.map((l) => (l.id === id ? tombstone(l) : l)),
+          ...touch(s, "leads", id),
+        }));
       },
       convertLeadToProject: (id) => {
         const lead = get().leads.find((l) => l.id === id);
@@ -208,8 +264,58 @@ export const useAppStore = create<AppState>()(
           leads: s.leads.map((l) =>
             l.id === id ? { ...l, convertedProjectId: project.id, updatedAt: nowIso() } : l,
           ),
+          ...touch(s, "leads", id),
         }));
         return project;
+      },
+
+      /**
+       * A szerverről érkezett rekordok beolvasztása. Amelyikből nálunk
+       * frissebb van (mert offline módosítottuk és még nem ment fel), azt
+       * megtartjuk — az majd a következő feltöltéskor nyer.
+       */
+      applyServerChanges: (changes) => {
+        set((state) => {
+          const next: Partial<Record<SyncTable, SyncRecord[]>> = {};
+
+          for (const table of SYNC_TABLES) {
+            const incoming = changes[table];
+            if (!incoming || incoming.length === 0) continue;
+
+            const current = state[table] as unknown as SyncRecord[];
+            const byId = new Map(current.map((row) => [row.id, row]));
+
+            for (const row of incoming) {
+              const mine = byId.get(row.id);
+              if (mine === undefined || row.updatedAt >= mine.updatedAt) {
+                byId.set(row.id, row);
+              }
+            }
+            next[table] = [...byId.values()];
+          }
+
+          return next as Partial<AppState>;
+        });
+      },
+
+      /** Sikeres feltöltés után ezek a rekordok már a szerveren vannak. */
+      clearPending: (table, ids) => {
+        set((s) => ({
+          pending: { ...s.pending, [table]: s.pending[table].filter((id) => !ids.includes(id)) },
+        }));
+      },
+
+      /** Belépéskor, ha a fiók adatait vesszük át a helyiek helyett. */
+      resetLocalData: () => {
+        set({
+          clients: [],
+          projects: [],
+          quotes: [],
+          invoices: [],
+          leads: [],
+          pending: emptyPending(),
+          hasUserData: false,
+        });
       },
 
       setPlan: (plan) => set((s) => ({ settings: { ...s.settings, plan } })),
@@ -220,12 +326,27 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "evm-store",
-      version: 2,
+      version: 3,
       // v1 records predate sync metadata: without updatedAt the first sync
       // could not tell which side was newer, so they inherit createdAt.
       migrate: (persisted, version) => {
-        if (version >= 2) return persisted as AppState;
         const state = persisted as AppState;
+
+        // v3: a szinkron nyilvántartása. A meglévő helyi adat a felhasználóé,
+        // tehát feltöltendő — de a sorrend miatt ezt csak akkor jelöljük meg,
+        // ha tényleg dolgozott vele (lásd hasUserData).
+        if (version < 3) {
+          state.pending = state.pending ?? {
+            clients: [],
+            projects: [],
+            quotes: [],
+            invoices: [],
+            leads: [],
+          };
+          state.hasUserData = state.hasUserData ?? false;
+        }
+
+        if (version >= 2) return state;
         const backfill = <T extends { createdAt: string; updatedAt?: string }>(rows: T[] = []) =>
           rows.map((row) => ({ ...row, updatedAt: row.updatedAt ?? row.createdAt }));
         return {

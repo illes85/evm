@@ -66,6 +66,27 @@ használja (Chrome-ban működik igazán jól). Amikor lesz backend:
 - a lead-integrációk valódi OAuth-alapú Google Sheets / Google Business
   Profile kapcsolatot kapnak.
 
+## Fiók és szinkron
+
+Fiók nélkül az app ugyanúgy használható, csak az adatok kizárólag az adott
+eszközön, helyben tárolódnak. Bejelentkezés után minden eszközön ugyanaz
+látszik, és a tárhelyen lévő adatbázis a biztonsági mentés.
+
+A szinkron **offline-first**: minden művelet először helyben történik meg,
+és a feltöltés a háttérben, magától fut — induláskor, változás után kis
+késleltetéssel, amikor visszatér a net, amikor az app újra előtérbe kerül,
+és ötpercenként. Térerő nélkül is lehet dolgozni; a feltöltésre váró
+változások száma a Beállításokban látszik.
+
+Egy kör mindig **előbb feltölt, aztán letölt**. Így a saját, még fel nem
+küldött munkát nem írja felül egy régebbi szerveroldali állapot.
+
+Bejelentkezéskor, ha az eszközön még csak a bemutató adatok vannak, azokat
+eldobjuk — különben minden új eszközön megszaporodnának. Ha viszont már
+dolgoztál helyben, az az adat felkerül a fiókba.
+
+A szerver oldaláról lásd a `server/README.md`-t.
+
 ## Adatmodell és a szinkron előkészítése
 
 Minden szinkronizálandó rekord hordoz három mezőt (`SyncMeta`):
