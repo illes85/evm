@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# A szerver beállításai (adatbázis-jelszó, titkos kulcs) csak a tárhelyen élnek
+server/config.php
